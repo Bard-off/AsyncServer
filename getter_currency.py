@@ -29,9 +29,9 @@ class GetCurrency:
             print("Data has been cleared to delete errors")
             await file.del_data("./data/data.json")
         try:
-            res = await cm.get_inform(self.api_url.format(date=self.date, cur=self.cur))
+            res = await cm.get_inform("https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@{date}/v1/currencies/{cur}.json".format(date=self.date, cur=self.cur))
         except Exception as e:
-            return {"status": 404, "error": e}
+            return {"status": 404, "error": str(e)}
         new_res = {"date": self.date, f"{self.cur}": {}}
         for cur in self.currencies:
             new_res[self.cur][cur] = res[self.cur][cur]
