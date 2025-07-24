@@ -21,10 +21,13 @@ class GetCurrency:
             return {"status": 404, "error": f"{self.cur} doesn't exist in currencies's data"}
         if not cm.check_date(self.date):
             return {"status": 422, "error": f"{self.date} is invalid"}
-
-        checker = await file.checker_to_cur_exist("./data/data.json", self.date, self.cur)
-        if checker != False:
-            return {"data": checker, "type": "cache"}
+        try:
+            checker = await file.checker_to_cur_exist("./data/data.json", self.date, self.cur)
+            if checker != False:
+                return {"data": checker, "type": "cache"}
+        except json.decoder.JSONDecodeError:
+            print("Data has been cleared to delete errors")
+            await file.del_data("./data/data.json")
         try:
             res = await cm.get_inform("https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@{date}/v1/currencies/{cur}.json".format(date=self.date, cur=self.cur))
         except Exception as e:
