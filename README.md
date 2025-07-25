@@ -37,33 +37,27 @@ GET /rates?base=usd&date=2024-07-26
 - [Exchange Rates (latest)](https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/{currency}.json)
 - [Exchange Rates (by date)](https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@{date}/v1/currencies/{currency}.json)
 
-## Cache Mechanism
-
-- **Location:** Predefined folder on disk
-- **Key:** `{base_currency}_{date}.json`
-- Requests first check cache; if missing, fetch from API and populate cache.
-
 ## Example Usage
 
 ```http
-GET /rates?base=eur
+GET /currency/{currency}/{date}
 ```
 ```http
-GET /rates?base=usd&date=2024-09-28
+GET /currency/rub/2024-07-11
 ```
+```http
+```http
+GET /currency/rub
+```
+
 
 ### Responses
 
 ```json
-{
-  "base": "usd",
-  "date": "2024-09-28",
-  "rates": {
-    "eur": 0.91,
-    "rub": 93.1,
-    "cny": 7.25
-  }
-}
+{"date": "2024-07-11", "rub": {"rub": 1, "eur": 0.010270994, "usd": 0.011127429, "ttd": 0.075398619}}', 'type': 'API/cache'}
+```
+```json
+  {"date": "2025-07-26(latest for tests)", "rub": {"rub": 1, "eur": 0.010270994, "usd": 0.011127429, "ttd": 0.075398619}}', 'type': 'API/cache'}
 ```
 
 ## Error Handling
@@ -83,8 +77,9 @@ GET /rates?base=usd&date=2024-09-28
   ├── data.json (cache file)
   ├── vals.py (current stocks)
 ├── server.py
+├── file_cls.py
 ├── client.py
-├── get_currency.py
+├── getter_currency.py
 ├── common.py
 ├── config.py
 └── README.md
