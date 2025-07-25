@@ -55,10 +55,10 @@ GET /currency/rub
 ### Responses
 
 ```json
-{"date": "2024-07-11", "rub": {"rub": 1, "eur": 0.010270994, "usd": 0.011127429, "ttd": 0.075398619}}', 'type': 'API/cache'}
+{"date": "2024-07-11", "rub": {"rub": 1, "eur": 0.010270994, "usd": 0.011127429, "ttd": 0.075398619}}', "type": "API/cache"}
 ```
 ```json
-  {"date": "2025-07-26(latest for tests)", "rub": {"rub": 1, "eur": 0.010270994, "usd": 0.011127429, "ttd": 0.075398619}}', 'type': 'API/cache'}
+  {"date": "2025-07-26(latest for tests)", "rub": {"rub": 1, "eur": 0.010270994, "usd": 0.011127429, "ttd": 0.075398619}}', "type": "API/cache"}
 ```
 
 ## Error Handling
