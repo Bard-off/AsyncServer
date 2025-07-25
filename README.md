@@ -1,68 +1,111 @@
-# Веб-приложение для получения курсов валют
+# Currency Exchange Rate Async Web Service
 
-### Задача
+## Overview
 
-Разработайте асинхронное веб-приложение (микросервис)
-для получения обменного курса переданной валюты к заранее указанным валютам.
+Asynchronous web microservice for fetching currency exchange rates to selected target currencies. Supports querying for a specific date and implements on-disk caching to minimize API requests.
 
-Добавьте возможность указать дату в запросе.
+## Features
 
-Сохраняйте кэш на диск.
+- **Async HTTP server** with `aiohttp`
+- **Async HTTP client** requests for external APIs
+- **On-disk cache** via `aiofiles`
+- Support for querying by **currency** and **date** (with current date as default)
+- **Error handling**: 404 for unknown currency, 422 for invalid date
 
-### Описание
+## Endpoints
 
-#### Библиотеки
+### Get Exchange Rates
 
-- Используйте `aiohttp` server для создания асинхронного веб-приложения.
-- Используйте `aiohttp` client для выполнения асинхронных запросов в сеть.
-- Используйте `aiofiles` для работы с файлами (чтение / запись) в асинхронном виде.
+#### `GET /rates`
 
-#### API
+**Query Parameters:**
+- `base` *(str, required)*: ISO code of the source currency (e.g. `usd`)
+- `date` *(str, optional)*: Date in ISO-8601 (`YYYY-MM-DD`). Defaults to today.
 
-Воспользуйтесь любым удобным API для получения актуальных курсов валют.
+**Response:**
+- Exchanged rates to a predefined static set of target currencies.
 
-Например, можно использовать
-бесплатный инструмент [`fawazahmed0/exchange-api`](https://github.com/fawazahmed0/exchange-api).
+**Example**:
 
-Для получения списка доступных валют воспользуйтесь следующим
-эндпоинтом: https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies.json
+```
+GET /rates?base=usd&date=2024-07-26
+```
 
-Для получения обменного курса по выбранной валюте за актуальную дату воспользуйтесь этим адресом:
-`https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/{currency}.json`,
-например [https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/eur.json](https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/eur.json).
+## API & Data Sources
 
-Для указания даты замените `latest` на дату в формате [ISO-8601](https://en.wikipedia.org/wiki/ISO_8601).
-Шаблон: `https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@{date}/v1/currencies/{currency}.json`,
-пример адреса для
-запроса: [https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@2024-09-28/v1/currencies/rub.json](https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@2024-09-28/v1/currencies/rub.json)
+- [Currency List](https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies.json)
+- [Exchange Rates (latest)](https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/{currency}.json)
+- [Exchange Rates (by date)](https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@{date}/v1/currencies/{currency}.json)
 
-#### Конфигурация
+## Cache Mechanism
 
-Укажите статичный набор целевых валют, обменный курс к которым необходимо вернуть.
+- **Location:** Predefined folder on disk
+- **Key:** `{base_currency}_{date}.json`
+- Requests first check cache; if missing, fetch from API and populate cache.
 
-#### Обертка для API запросов
+## Example Usage
 
-Создайте обертку для выполнения API запросов:
+```http
+GET /rates?base=eur
+```
+```http
+GET /rates?base=usd&date=2024-09-28
+```
 
-- сетевые запросы выполняйте через aiohttp client;
-- реализуйте верхнеуровневый метод для получения обменного курса выбранной валюты на указанную дату;
-- добавьте метод для чтения данных из кэша - с диска;
-- если уже существует закэшированное значение для выбранной валюты на указанную дату,
-  возвращайте это значение и не выполняйте дополнительных запросов сеть;
-- при обращении по API заготавливайте объект для ответа на основе полученных данных,
-  создавайте кэш - сохраняйте значение на диске в заранее созданной папке.
+### Responses
 
-#### Приложение
+```json
+{
+  "base": "usd",
+  "date": "2024-09-28",
+  "rates": {
+    "eur": 0.91,
+    "rub": 93.1,
+    "cny": 7.25
+  }
+}
+```
 
-Создайте веб-приложение на aiohttp server:
+## Error Handling
 
-- добавьте единственный обработчик для получения актуального обменного курса;
-- поддержите запрос курса валют с указанием даты и без. Если дата не указана, берите сегодняшний день;
-- запрашивайте данные через обертку для API запросов. Если данные уже есть в кэше,
-  отправлять новый API запрос не требуется, а если данные запрошены в первый раз,
-  то необходимо создать в кэше новую запись из полученных данных.
+- `404 Not Found`: Unknown currency code
+- `422 Unprocessable Entity`: Invalid date format
 
-##### Обработка ошибок
+## Tech Stack
 
-- если передана неизвестная валюта, возврат статуса 404;
-- если передана невалидная дата, возврат статуса 422.
+- [aiohttp](https://docs.aiohttp.org/) for web server and HTTP client
+- [aiofiles](https://pypi.org/project/aiofiles/) for asynchronous filesystem caching
+
+## Project Structure
+
+```
+├── data/
+  ├── data.json (cache file)
+  ├── vals.py (current stocks)
+├── server.py
+├── client.py
+├── get_currency.py
+├── common.py
+├── config.py
+└── README.md
+```
+
+### Quick Start
+
+1. **Install dependencies:**
+   ```bash
+   pip install aiohttp aiofiles
+   ```
+
+2. **Run server:**
+   ```bash
+   python server.py
+   ```
+
+3. **Query exchange rates:**
+   ```
+   curl "http://localhost:8080/currency/{currency}/{date}"
+   ```
+   ```
+   curl "http://localhost:8080/currency/{currency}"
+   ```
