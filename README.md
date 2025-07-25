@@ -42,10 +42,11 @@ GET /rates?base=usd&date=2024-07-26
 ```http
 GET /currency/{currency}/{date}
 ```
+
 ```http
 GET /currency/rub/2024-07-11
 ```
-```http
+
 ```http
 GET /currency/rub
 ```
